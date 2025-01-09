@@ -40,6 +40,8 @@ pub struct Args {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    println!("Hello, world!");
+    
     // Set up tracing and parse args.
     let filter = filter::Targets::new()
         .with_target("mev_share_uni_arb", Level::INFO)
