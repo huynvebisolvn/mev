@@ -1,80 +1,29 @@
-# Whack-A-Mole
+simple-arbitrage
+================
+This repository contains a simple, mechanical system for discovering, evaluating, rating, and submitting arbitrage opportunities to the Flashbots bundle endpoint. This script is very unlikely to be profitable, as many users have access to it, and it is targeting well-known Ethereum opportunities.
 
-The image is of Dugtrio from Pokemon.
+We hope you will use this repository as an example of how to integrate Flashbots into your own Flashbot searcher (bot). For more information, see the [Flashbots Searcher FAQ](https://docs.flashbots.net/flashbots-auction/searchers/faq)
 
-### What the heck?
+Environment Variables
+=====================
+- **ETHEREUM_RPC_URL** - Ethereum RPC endpoint. Can not be the same as FLASHBOTS_RPC_URL
+- **PRIVATE_KEY** - Private key for the Ethereum EOA that will be submitting Flashbots Ethereum transactions
+- **FLASHBOTS_RELAY_SIGNING_KEY** _[Optional, default: random]_ - Flashbots submissions require an Ethereum private key to sign transaction payloads. This newly-created account does not need to hold any funds or correlate to any on-chain activity, it just needs to be used across multiple Flashbots RPC requests to identify requests related to same searcher. Please see https://docs.flashbots.net/flashbots-auction/searchers/faq#do-i-need-authentication-to-access-the-flashbots-relay
+- **HEALTHCHECK_URL** _[Optional]_ - Health check URL, hit only after successfully submitting a bundle.
+- **MINER_REWARD_PERCENTAGE** _[Optional, default 80]_ - 0 -> 100, what percentage of overall profitability to send to miner.
 
-Whack-A-Mole is a CEX-DEX arbitrage bot written in Python.
+Usage
+======================
+1. Generate a new bot wallet address and extract the private key into a raw 32-byte format.
+2. Deploy the included BundleExecutor.sol to Ethereum, from a secured account, with the address of the newly created wallet as the constructor argument
+3. Transfer WETH to the newly deployed BundleExecutor
 
-Arbitrage strategies are like the global Whack-A-Mole game played in parallel.
+_It is important to keep both the bot wallet private key and bundleExecutor owner private key secure. The bot wallet attempts to not lose WETH inside an arbitrage, but a malicious user would be able to drain the contract._
 
-Multiple players participate to find the mole that pops up, and jump to capture that opportunity.
-
-Who knows who'll win...
-
-What we know for certain is that you'll need a fast pair of eyes on the market at all times,
-and an extra fast execution engine to capture the moment without latency.
-
-Will our beloved Python be able to accomplish this? We'll see 😎
-
-### Example Strategy #1: DEX Arbitrage Base
-
-This branch has an example strategy that supports DEX arbitrages.
-
-The smart contracts for WhackAMoleBotV1 and SimulatorV1 can be found in **contracts/src**.
-
-```bash
-forge compile
 ```
-
-Running the above Foundry forge command will compile the contracts for you creating an "out" directory.
-
-The starting point for this example is "main.py" file.
-
-```python
-import asyncio
-
-from strategies.dex_arb_base import main
-
-
-if __name__ == '__main__':
-    asyncio.run(main())
+$ npm install
+$ PRIVATE_KEY=__PRIVATE_KEY_FROM_ABOVE__ \
+    BUNDLE_EXECUTOR_ADDRESS=__DEPLOYED_ADDRESS_FROM_ABOVE__ \
+    FLASHBOTS_RELAY_SIGNING_KEY=__RANDOM_ETHEREUM_PRIVATE_KEY__ \
+      npm run start
 ```
-
-Running this code will run the main function in **strategies/dex_arb_base.py**.
-
-Before running though, make sure to check whether you have your .env file setup correctly.
-
-```bash
-ETHEREUM_HTTP_RPC_URL=
-POLYGON_HTTP_RPC_URL=
-ARBITRUM_HTTP_RPC_URL=
-
-ETHEREUM_WS_RPC_URL=
-POLYGON_WS_RPC_URL=
-ARBITRUM_WS_RPC_URL=
-
-INFLUXDB_TOKEN=
-INFLUXDB_URL=
-INFLUXDB_ORG=
-INFLUXDB_BUCKET=
-
-FLASHBOTS_SIGNING_KEY=
-FLASHBOTS_PRIVATE_KEY=
-
-BLOCKNATIVE_TOKEN=
-
-TELEGRAM_TOKEN=
-TELEGRAM_CHAT_ID=
-
-ETHEREUM_BOT_ADDRESS=
-ETHEREUM_SIMULATOR_ADDRESS=
-```
-
-This example runs on Ethereum only, so filling in the required variables for Ethereum
-related fields will do the trick. And the usage of InfluxDB and Telegram are optional.
-
-If you leave the fields blank, it'll simply ignore InfluxDB/Telegram.
-
-However, this example uses Blocknative's gas estimator service, thus, the "BLOCKNATIVE_TOKEN" field
-is necessary.
